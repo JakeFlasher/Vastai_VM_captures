@@ -1,0 +1,4568 @@
+{
+  "campaigns": [
+    {
+      "id": "sm120_identity_and_scalar",
+      "purpose": "identity, launch envelope, and basic scalar issue",
+      "rows": [
+        "fp32_fma_dep_chain",
+        "warp_divergence_reconvergence",
+        "register_spill_local_mem"
+      ]
+    },
+    {
+      "id": "sm120_memory_and_cache",
+      "purpose": "global/shared/L2/DRAM mechanism controls",
+      "rows": [
+        "global_scalar_32b_copy",
+        "global_vectorized_64b_copy",
+        "global_vectorized_128b_copy",
+        "shared_bank_conflict_stride",
+        "l2_thrash_pointer_chase",
+        "working_set_capacity_sweep",
+        "l2_prefetch_hint_sweep",
+        "l2_persisting_window_sweep",
+        "dram_stream_stride_mix",
+        "dram_streaming_dot_product"
+      ]
+    },
+    {
+      "id": "sm120_tensor_and_quant",
+      "purpose": "safe tensor paths first, then explicitly gated FP8/FP6/FP4/NVFP4 probes",
+      "rows": [
+        "bf16_hmma_gemm_traceable",
+        "fp16_hmma_gemm_traceable",
+        "tf32_hmma_gemm_traceable",
+        "int8_imma_gemm_traceable",
+        "sparse_2to4_bf16_gemm",
+        "sparse_2to4_int8_gemm",
+        "fp8_e4m3_qmma_dep_chain",
+        "fp8_e5m2_saturation",
+        "fp6_e3m2_mma_dep_chain",
+        "fp6_e2m3_saturation",
+        "fp4_e2m1_mma_dep_chain",
+        "nvfp4_blockscale_gemm",
+        "sparse_2to4_fp8_gemm"
+      ]
+    },
+    {
+      "id": "sm120_async_cluster",
+      "purpose": "cp.async/TMA, cluster, DSMEM, and synchronization boundaries",
+      "rows": [
+        "cp_async_shared_tile_copy",
+        "tma_tensor_copy_2d",
+        "dsmem_pairwise_latency",
+        "dsmem_ring_bandwidth",
+        "cluster_remote_reduction",
+        "cluster_rmsnorm_dsmem_bf16"
+      ]
+    },
+    {
+      "id": "sm120_solbench_fib",
+      "purpose": "all 26 FlashInfer/FIB source families, staged by source/build/correctness",
+      "source_filter": {
+        "category": "FlashInfer-Bench"
+      }
+    },
+    {
+      "id": "sm120_solbench_l1_representative",
+      "purpose": "representative custom, CUTLASS, memory, attention, MoE, and vision rows before full L1 expansion",
+      "source_filter": {
+        "category": "L1",
+        "count": 16
+      }
+    },
+    {
+      "id": "sm120_solbench_l2_representative",
+      "purpose": "representative fused transformer, MoE, Mamba, diffusion, and vision rows before full L2 expansion",
+      "source_filter": {
+        "category": "L2",
+        "count": 16
+      }
+    },
+    {
+      "id": "sm120_solbench_quant_all",
+      "purpose": "all 33 Quant rows; FP8 and NVFP4 rows retain separate feature/build dispositions",
+      "source_filter": {
+        "category": "Quant"
+      }
+    }
+  ],
+  "official_solbench": [
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Fused Add + RMSNorm with hidden_size=2048 for Qwen3-30B-A3B. Epsilon is fixed at 1e-6.",
+      "slug": "001_fused_add_rmsnorm_h2048",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 7
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Fused Add + RMSNorm with hidden_size=4096 for Llama-3.1-8B. Epsilon is fixed at 1e-5.",
+      "slug": "002_fused_add_rmsnorm_h4096",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Fused Add + RMSNorm with hidden_size=7168 for DeepSeek-V3/R1. Epsilon is fixed at 1e-6.",
+      "slug": "003_fused_add_rmsnorm_h7168",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 8
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Qwen 3 30B A3B moe.gate.",
+      "slug": "004_gemm_n128_k2048",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 25
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from DeepSeek-V3 moe.gate.",
+      "slug": "005_gemm_n256_k7168",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 17
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Qwen 3 30B A3B attn.o_proj.",
+      "slug": "006_gemm_n2048_k4096",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 29
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Llama 3.1 8B attn.o_proj.",
+      "slug": "007_gemm_n4096_k4096",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 43
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Llama 3.1 8B mlp.down_proj.",
+      "slug": "008_gemm_n4096_k14336",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 43
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Qwen 3 30B A3B attn.qkv_proj.",
+      "slug": "009_gemm_n5120_k2048",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 25
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Llama 3.1 8B attn.qkv_proj.",
+      "slug": "010_gemm_n6144_k4096",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 43
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "General matrix multiply (GEMM) C = A @ B.T. Captured from Llama 3.1 8B mlp.gate_up_proj.",
+      "slug": "011_gemm_n28672_k4096",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 43
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "len_indptr",
+        "num_kv_indices",
+        "num_pages"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Grouped Query Attention decode with a paged KV cache. Captured from Qwen3-30B-A3B.",
+      "slug": "012_gqa_paged_decode_h32_kv4_d128_ps1",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 48
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "len_indptr",
+        "num_kv_indices",
+        "num_pages"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Grouped Query Attention decode with a paged KV cache. Captured from Llama-3.1-8B.",
+      "slug": "013_gqa_paged_decode_h32_kv8_d128_ps1",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 48
+    },
+    {
+      "axis_keys": [
+        "len_indptr",
+        "num_kv_indices",
+        "num_pages",
+        "total_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Grouped Query Attention prefill with a paged KV cache. Causal mask is applied. Captured from Qwen3-30B-A3B during incremental prefill.",
+      "slug": "014_gqa_paged_prefill_causal_h32_kv4_d128_ps1",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 30
+    },
+    {
+      "axis_keys": [
+        "len_indptr",
+        "num_kv_indices",
+        "num_pages",
+        "total_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Grouped Query Attention prefill with a paged KV cache. Causal mask is applied. Captured from Llama-3.1-8B during incremental prefill.",
+      "slug": "015_gqa_paged_prefill_causal_h32_kv8_d128_ps1",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 38
+    },
+    {
+      "axis_keys": [
+        "len_indptr",
+        "total_kv",
+        "total_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Grouped Query Attention prefill with ragged (variable-length) inputs. Causal mask is applied. Captured from Qwen3-30B-A3B during total prefill.",
+      "slug": "016_gqa_ragged_prefill_causal_h32_kv4_d128",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 15
+    },
+    {
+      "axis_keys": [
+        "len_indptr",
+        "total_kv",
+        "total_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Grouped Query Attention prefill with ragged (variable-length) inputs. Causal mask is applied. Captured from Llama-3.1-8B during total prefill.",
+      "slug": "017_gqa_ragged_prefill_causal_h32_kv8_d128",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 21
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "len_indptr",
+        "num_kv_indices",
+        "num_pages"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Multi-head Latent Attention decode with a paged KV cache. Captured from DeepSeek-V3 with tensor parallel size 8.",
+      "slug": "018_mla_paged_decode_h16_ckv512_kpe64_ps1",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 47
+    },
+    {
+      "axis_keys": [
+        "len_indptr",
+        "num_kv_indices",
+        "num_pages",
+        "total_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Batched Multi-head Latent Attention prefill with a paged KV cache. Causal mask is applied. Captured from DeepSeek-V3 during incremental prefill with tensor parallel size 8.",
+      "slug": "019_mla_paged_prefill_causal_h16_ckv512_kpe64_ps1",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 38
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "FP8 block scale MoE operation. Routing and two grouped-GEMM included.",
+      "slug": "020_moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 19
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Root Mean Square Normalization with hidden_size=128. Captured from Qwen3-30B-A3B. Epsilon is fixed at 1e-6.",
+      "slug": "021_rmsnorm_h128",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Root Mean Square Normalization with hidden_size=512. Captured from DeepSeek-V3/R1. Epsilon is fixed at 1e-6.",
+      "slug": "022_rmsnorm_h512",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 8
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Root Mean Square Normalization with hidden_size=1536. Captured from DeepSeek-V3/R1. Epsilon is fixed at 1e-6.",
+      "slug": "023_rmsnorm_h1536",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 8
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Root Mean Square Normalization with hidden_size=2048. Captured from Qwen3-30B-A3B. Epsilon is fixed at 1e-6.",
+      "slug": "024_rmsnorm_h2048",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 7
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Root Mean Square Normalization with hidden_size=4096. Captured from Llama-3.1-8B. Epsilon is fixed at 1e-5.",
+      "slug": "025_rmsnorm_h4096",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "FlashInfer-Bench",
+      "description": "Root Mean Square Normalization with hidden_size=7168. Captured from DeepSeek-V3/R1. Epsilon is fixed at 1e-6.",
+      "slug": "026_rmsnorm_h7168",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 8
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len_kv",
+        "seq_len_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for attention softmax, dropout, and value matmul. Computes gradients through: transpose -> batched matmul -> dropout -> softmax -> GQA head expansion.",
+      "slug": "001_attention_softmax_dropout_value_matmul_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Complete fused residual block combining two sequential Conv3x3->GroupNorm->SiLU operations with residual addition. This is the fundamental building block of Sana's VAE encoder/decoder: input -> Conv3x3 -> GroupNorm -> SiLU -> Conv3x3 -> GroupNorm -> SiLU -> add(input). Processes feature maps with 256 channels and 32 groups for GroupNorm.",
+      "slug": "002_vae_conv3x3_groupnorm_silu_residual_fused",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 20
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "logits_to_keep",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Final language model head projection from hidden states to vocabulary logits with optional slicing for generation efficiency. Projects [batch, seq_len, 2048] to [batch, logits_to_keep, 102400]. During generation, logits_to_keep specifies how many trailing positions to compute (typically 1 for autoregressive decoding).",
+      "slug": "003_lm_head_projection_with_logit_slicing",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for attention output projection with reshape. Computes gradients w.r.t. attn_output and weight from grad_output. Forward: transpose (B,H,S,D)->(B,S,H,D), reshape (B,S,H,D)->(B,S,H*D), linear projection.",
+      "slug": "004_attention_output_projection_with_reshape_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Complete fused convolution layer operation that combines triple linear projection, element-wise gating, causal 1D grouped convolution, gating with output channel, and final output projection. This is the dominant operation in non-attention layers in LFM2 architecture.",
+      "slug": "005_conv_gated_projection_with_causal_conv",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Depthwise 1D convolution with padding followed by channel splitting and initial element-wise gating in HyenaOperator. Takes projected input (inner_width channels), applies depthwise grouped convolution with kernel size 3 and padding 2, truncates to sequence length, splits into (order+1) components, and performs first gating operation (v * x[0]).",
+      "slug": "006_hyena_depthwise_conv1d_split_gate",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seqlen"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused FFT size padding and real FFT computation for Hyena convolution. Pads input to 2*seqlen for circular convolution, computes real FFT (rfft), and normalizes by fft_size. Input is (batch, channels, seqlen) and output is complex tensor (batch, channels, seqlen+1) in frequency domain.",
+      "slug": "007_hyena_fft_size_padding_rfft",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Critical atomic MoE operation that performs weighted expert output accumulation using index_add_ with element-wise routing weight multiplication. Expert outputs are multiplied by routing weights and scattered back to original token positions using atomic additions.",
+      "slug": "008_expert_output_weighted_index_add_accumulation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len",
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for expert token scatter with weighted forward. Computes gradients for hidden_states, routing_weights, and expert MLP weights (w1, w2, w3) through SwiGLU activation.",
+      "slug": "009_expert_token_scatter_with_weighted_forward_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused attention value projection with reshape and transpose for GQA attention. Projects hidden states from hidden_size=5120 to num_kv_heads*head_dim=1024, then reshapes and transposes to [batch, num_kv_heads, seq_len, head_dim] format for attention computation.",
+      "slug": "010_attention_value_projection_with_transpose",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "RoPE (Rotary Position Embedding) computation with llama3 scaling that computes cos/sin embeddings from inverse frequencies and position IDs. Uses frequency-based scaling with high_freq_factor=4.0, low_freq_factor=1.0, factor=8.0 for extended context support up to 131072 positions. Returns concatenated cos and sin embeddings.",
+      "slug": "011_rotary_position_embedding",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused cos/sin embedding generation from frequencies for RoPE. Takes frequency tensor (result of inv_freq @ position_ids) and generates cos/sin embeddings with attention scaling. Concatenates frequencies with themselves, computes cos and sin with scaling in a single pass.",
+      "slug": "012_fused_cos_sin_embedding_generation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for fused residual addition and RMSNorm. Computes gradients for hidden_states, residual, and weight given the gradient of the output.",
+      "slug": "013_fused_residual_rms_norm_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for rotary position embedding with attention scaling. Computes gradients with respect to position_ids through the RoPE embedding generation pipeline including inverse frequency expansion, frequency computation, and cos/sin with attention scaling.",
+      "slug": "014_rotary_embedding_with_attention_scaling_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Grouped Query Attention with RoPE and Query/Key RMSNorm. Features 32 query heads, 8 KV heads (4x grouping), per-head RMSNorm on Q/K before RoPE application, and causal attention. This is the core attention mechanism from Qwen3-8B.",
+      "slug": "015_grouped_query_attention_with_rope_and_qk_norm",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Computes the inverse frequency tensor for RoPE embeddings. Generates frequencies as: inv_freq = 1.0 / (rope_theta^(arange(0, head_dim, 2) / head_dim)). This is a one-time initialization operation that determines the frequency spectrum for rotary position embeddings.",
+      "slug": "016_rope_inverse_frequency_computation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for MoE expert SwiGLU with down projection. Computes gradients through the complete expert MLP chain: down_proj <- SwiGLU <- [gate_proj, up_proj]. Returns gradients for input x and all three weight matrices (gate, up, down).",
+      "slug": "017_moe_expert_swiglu_with_down_projection_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "cache_len",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused operation combining per-head RMS normalization on Q and K, RoPE (Rotary Position Embedding) application, and KV cache update. This eliminates 5+ separate kernel launches by keeping intermediate results in registers/shared memory.",
+      "slug": "018_fused_rope_with_qk_norm_and_kv_cache_update",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 13
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for Vision 3D Rotary Embedding with Spatial Merge Indexing. Computes gradients for query (q), key (k), and rotary embeddings tensors. The forward pass applies rotary position embeddings using cos/sin rotation pattern: q_embed = q * cos + rotate_half(q) * sin.",
+      "slug": "019_vision_3d_rotary_embedding_with_spatial_merge_indexing_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_grids",
+        "num_merged_patches",
+        "num_patches"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Vision patch merger that performs spatial shuffling to merge patches (spatial_merge_size=2), applies layer normalization, and processes through a 2-layer MLP with GELU activation. Converts fine-grained vision tokens into coarser representations by merging 2x2 spatial patches.",
+      "slug": "020_vision_patch_merger_spatial_shuffle_mlp",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 15
+    },
+    {
+      "axis_keys": [
+        "num_seqs",
+        "total_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Vision encoder attention with variable-length sequence support using cumulative sequence lengths (cu_seqlens). Processes multiple images/videos with different resolutions in a single batch by using cu_seqlens to define sequence boundaries. Includes QKV projection, rotary position embeddings, scaled dot-product attention per sequence, and output projection.",
+      "slug": "021_vision_cu_seqlens_variable_length_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for Vision MLP with GELU activation. Computes gradients for input hidden state, fc1 weight/bias, and fc2 weight/bias through the chain: fc2 -> GELU -> fc1.",
+      "slug": "022_vision_mlp_gelu_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_images",
+        "total_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Computes 3D rotary position embeddings for multimodal inputs by generating position indices from grid_thw (temporal, height, width) parameters, performing bilinear interpolation for variable resolution support, and creating interleaved MRoPE embeddings. Combines grid-based position index generation, learned position embedding lookup with bilinear interpolation weights, spatial permutation to merge_size blocks, and rotary embedding frequency computation with interleaving.",
+      "slug": "023_multimodal_rope_position_computation_with_grid_based_indexing",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "max_grid_size",
+        "num_images",
+        "total_patches"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for vision rotary position embedding generation. Computes gradients through cos/sin operations, concatenation, indexing, and outer product to produce gradient for inverse frequencies.",
+      "slug": "024_vision_rotary_position_embedding_generation_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "GELU activation function using tanh approximation applied element-wise to video latent tensors. Formula: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3))). This is executed in transformer feedforward networks on intermediate tensors.",
+      "slug": "025_video_latent_gelu_activation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Video patch embedding projection that converts raw video frames into patch tokens. Applies Conv3D patch projection, adds spatial and temporal positional embeddings, and applies layer normalization. Input video shape is (batch, frames, channels, height, width), output is (batch, num_patches, hidden_size) where num_patches = frames * (height/patch_size) * (width/patch_size).",
+      "slug": "026_video_patch_embedding_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 4
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_frames",
+        "num_patches_per_frame"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Video Spatial Attention with 3D Rotary Position Embedding. Applies multi-head self-attention to video tokens with 3D RoPE encoding spatial (height, width) and temporal (frame) positions. Critical for text-to-video generation where spatial coherence and temporal awareness are essential.",
+      "slug": "027_video_spatial_attention_with_rope_3d",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "past_key_values_length",
+        "seq_length"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Hybrid causal mask preparation system that creates separate attention masks for full attention and sliding window attention layers. Creates two distinct 4D causal masks: standard causal masking for full attention layers and sliding window causal masking for SWA layers.",
+      "slug": "028_hybrid_attention_mask_preparation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 12
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused 1D causal convolution with gated projection for Mamba layers. Performs gated linear projection (hidden_size -> 2*intermediate_size), splits into hidden states and gate, applies causal 1D depthwise convolution, SiLU activation, and optional attention masking.",
+      "slug": "029_mamba_conv1d_with_gating",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused attention output projection (o_proj) with residual addition. After computing attention outputs, this operation performs the final linear projection and adds the residual connection. The projection is a matmul (hidden_size x hidden_size) fused with elementwise residual add to eliminate intermediate memory traffic.",
+      "slug": "030_attention_output_projection_with_residual",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused Grouped Query Attention (GQA) key-value repetition and attention score computation. This operation repeats key tensors from num_key_value_heads to num_attention_heads (4x expansion), then computes scaled attention scores via Q@K^T. The fusion avoids materializing the expanded key tensor, saving 75% of intermediate memory bandwidth.",
+      "slug": "031_repeat_kv_attention_matmul",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused attention weights @ value matmul with transpose and reshape. Performs attn_weights @ value_states followed by transpose from (batch, num_heads, seq_len, head_dim) to (batch, seq_len, num_heads, head_dim) and reshape to (batch, seq_len, hidden_size). This is the second major matmul in attention that combines attention weights with value states, appearing 64 times per forward pass.",
+      "slug": "032_attention_weights_matmul_with_value_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Post-normalization residual connection pattern: output = residual + RMSNorm(sublayer_output). RMSNorm applies learned weight scaling after normalization. Used after both attention and MLP blocks in Olmo3 architecture.",
+      "slug": "033_post_norm_residual",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Multi-axis rotary position embedding frequency computation that generates cos/sin frequency tensors for 3D position encoding (time, height, width). Computes 1D RoPE for each axis with dimensions [16, 56, 56] and concatenates them. Involves frequency band calculation, outer products, sin/cos evaluation, repeat_interleave operations, and concatenation across axes.",
+      "slug": "034_flux_multi_axis_rope_frequency_computation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "AdaLayerNormZero modulation parameter extraction for Flux dual-stream transformer. Projects timestep embeddings through a linear layer and chunks into 6 modulation parameters (shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp) that control attention and MLP paths.",
+      "slug": "035_flux_ada_layer_norm_zero_modulation_extraction",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Flux's final output processing chain combining AdaLayerNormContinuous normalization with output projection. Performs: (1) LayerNorm without affine parameters, (2) SiLU activation on temb followed by linear projection to extract shift/scale modulation parameters, (3) element-wise modulation (shift and scale), (4) large linear projection to output space.",
+      "slug": "036_flux_output_norm_projection_chain",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "FLUX feedforward network with GELU approximate activation (tanh approximation). Performs Linear projection to 4x hidden dimension, GELU-tanh activation, and Linear projection back to hidden dimension. This appears 76 times per forward pass in FLUX transformer blocks.",
+      "slug": "037_flux_feedforward_gelu_approximate",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Per-head RMSNorm applied to query and key tensors after projection in Flux attention. Applies RMSNorm independently to each attention head's Q and K vectors, normalizing across head_dim (128) for each of the 48 heads. This dual variant processes both Q and K tensors together to enable kernel fusion opportunities.",
+      "slug": "038_flux_multi_head_rmsnorm_qk",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "H",
+        "N",
+        "W"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for Adaptive Instance Normalization 2D. Computes gradients with respect to input, weight (gamma), and bias (beta). The normalization is performed per-channel across spatial dimensions: y = gamma * (x - mean) / sqrt(var + eps) + beta.",
+      "slug": "039_adaptive_instance_normalization_2d_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Convolutional residual block that combines input convolution (3->32 channels), output convolution (32->3 channels), and residual skip connection. This is the atomic building block for image restoration networks like NAFNet.",
+      "slug": "040_conv2d_residual_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Strided 2D convolution for spatial downsampling used in NAFNet's encoder path. Performs convolution with stride > 1 to reduce spatial dimensions while increasing channel capacity. Combines spatial reduction with feature transformation in a single operation.",
+      "slug": "041_strided_conv2d_downsampling",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for MoE expert load balancing and token capacity. Computes gradients through load_balance_loss, sum reduction, and scatter operations. Since topk_idx contains discrete indices and hidden_states is only used for shape, gradients w.r.t. both inputs are None.",
+      "slug": "042_moe_expert_load_balancing_and_token_capacity_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused Multi-head Latent Attention (MLA) QKV projection with RoPE split. Combines query low-rank projection (q_a_proj -> RMSNorm -> q_b_proj) with tensor splitting and key-value joint projection with split into a single operation. Eliminates intermediate memory writes for the latent representations.",
+      "slug": "043_mla_fused_qkv_rope_split",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "MoE expert computation with SwiGLU activation. Each expert is a small MLP with 2048 intermediate size that processes selected tokens. The expert uses gated activation (SwiGLU): down_proj(silu(gate_proj(x)) * up_proj(x)). Tokens are routed to experts based on expert_ids and weighted by expert_weights.",
+      "slug": "044_moe_expert_computation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused MLP pathway for ConvNextV2: expansion linear (dim -> 4*dim), GELU activation, Global Response Normalization (GRN) with L2 norm and channel-wise normalization, and projection linear (4*dim -> dim). Input/output in NHWC format.",
+      "slug": "045_fused_linear_gelu_grn_linear",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len_k",
+        "seq_len_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Attention softmax with logit softcapping (tanh-based clamping to \u00b130.0) applied before softmax, as used in Gemma-2 models. This operation applies: tanh(logits / 30.0) * 30.0 to stabilize attention scores, then softmax normalization.",
+      "slug": "046_attention_softmax_with_softcapping_and_dropout",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Gemma3 attention mechanism with query/key RMSNorm normalization, rotary position embeddings (RoPE), grouped-query attention (GQA) with 24 query heads and 8 KV heads, attention logit softcapping at 50.0, and causal masking. Includes Q/K/V/O projections.",
+      "slug": "047_attention_with_qk_norm_and_rope",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Gemma3's fused gate and up projection followed by GELU-tanh activation and element-wise multiplication. Computes gelu_tanh(x @ gate_proj.T) * (x @ up_proj.T) where gate_proj and up_proj are weight matrices. This fuses two parallel linear projections from hidden_size=3072 to intermediate_size=24576, followed by GELU activation on gate output and element-wise multiplication with up output.",
+      "slug": "048_fused_gate_up_projection_with_swiglu",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused attention Q@K^T computation with GQA key repetition and scaling. Takes query (batch, num_heads=4, seq_len, head_dim=256) and key (batch, num_kv_heads=1, seq_len, head_dim=256), repeats KV heads 4x to match query heads, computes Q@K^T, and applies scaling (1/sqrt(256)=0.0625).",
+      "slug": "049_attention_qk_matmul_with_gqa_repeat_and_scaling",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused QKV projection with bias and reshape for Gemma3 attention. Performs three separate linear projections (Q, K, V) with bias addition, then reshapes outputs from (batch, seq_len, hidden_size) to (batch, seq_len, num_heads, head_dim) format for multi-head attention.",
+      "slug": "050_attention_qkv_projection_with_bias_and_reshape",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for Gemma3 fused QKV projection with Q/K RMSNorm normalization. Computes gradients for hidden_states, Q/K/V projection weights, and Q/K normalization weights.",
+      "slug": "051_attention_qkv_with_qk_norm_single_kernel_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Collapses multiple AltUp prediction streams back into a single hidden state by projecting each stream through learned unembed matrices, normalizing their magnitudes to match the first stream, and averaging them together.",
+      "slug": "052_altup_hidden_state_collapse_with_magnitude_normalization",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "intermediate_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Gaussian-based top-k sparse activation mechanism. Computes adaptive sparsity by calculating a threshold based on input's mean and standard deviation, scaled by the inverse CDF of a normal distribution at the target sparsity level. Applies ReLU with this dynamic cutoff to create learned sparse activations.",
+      "slug": "053_gaussian_topk_sparse_activation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 12
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused QKV projection with per-head RMS normalization for audio attention. Projects hidden states to Q, K, V representations, reshapes to multi-head format, and applies separate RMS normalization to each head. This is a unique pattern where normalization is applied per-head rather than per-sequence.",
+      "slug": "054_audio_attention_qkv_projection_with_normalization",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused QKV projection with Grouped Query Attention (GQA) reshaping. Performs three linear projections (Q: 2048->2048, K: 2048->512, V: 2048->512) followed by reshape and transpose to prepare tensors for attention computation. Uses GQA pattern with 16 query heads and 4 key-value heads (4x compression).",
+      "slug": "055_attention_qkv_projection_with_gqa_reshape",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for Mamba SSM dt projection with softplus and clamp. Computes gradients through clamp, softplus, and bias addition operations.",
+      "slug": "056_mamba_ssm_dt_projection_softplus_clamp_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Multi-Token Prediction (MTP) shifted embedding with dual RMS normalization fusion. Rolls input_ids by -1, embeds shifted ids, applies RMSNorm to both embeddings and hidden states, concatenates, and projects back to hidden_size.",
+      "slug": "057_mtp_shifted_embedding_with_dual_rms_norm_fusion",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "MoE token sorting and bucketing using radix sort with prefix sum. Performs O(N) counting sort on bounded expert indices (0-255), computes prefix sum for cumulative offsets, and returns sorted token indices and expert boundaries. Critical for efficient MoE token-to-expert routing.",
+      "slug": "058_moe_expert_token_radix_sort_with_prefix_sum",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Group-based score aggregation and masking for MoE routing. Reshapes 256 expert scores into 8 groups of 32 experts each, computes group scores by summing top-2 expert scores within each group, selects top 4 groups, creates and expands group mask to expert-level, and applies masked_fill to suppress non-selected experts with -inf. This reduces the expert search space from 256 to ~128 experts before final topk selection.",
+      "slug": "059_moe_group_score_aggregation_and_masking",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len_k",
+        "seq_len_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for fused attention QK matmul with scaling, causal mask, and softmax. Computes gradients for query and key tensors through the chain: softmax_backward -> scale_backward -> matmul_backward.",
+      "slug": "060_fused_attention_qk_matmul_scale_mask_softmax_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for tanh-gated residual addition. Computes gradients for residual, hidden_states, and gate parameter. Forward: output = residual + tanh(gate) * hidden_states * mask. Backward computes: grad_residual = grad_output, grad_hidden_states = grad_output * tanh(gate) * mask, grad_gate = sum(grad_output * hidden_states * mask * sech^2(gate)).",
+      "slug": "061_tanh_gated_residual_add_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "max_seq_len",
+        "new_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for KV cache update with RoPE. Computes gradients for key_states, value_states, cos, sin, and input caches given gradients from downstream attention operations.",
+      "slug": "062_kv_cache_update_with_rope_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused attention output reshape and projection. Takes multi-head attention output from [batch, num_heads, seq_len, v_head_dim] format, transposes to [batch, seq_len, num_heads, v_head_dim], reshapes to [batch, seq_len, num_heads * v_head_dim] (requires contiguous copy), then projects to [batch, seq_len, hidden_size] via output projection. This is a critical memory bandwidth bottleneck due to non-contiguous transpose, memory reallocation for contiguous, and large intermediate dimension (16384) before projection to hidden_size (7168).",
+      "slug": "063_attention_output_reshape_and_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "DeepSeek-V3 latent KV expansion: RMSNorm on compressed KV (kv_lora_rank=512), linear projection to expanded space (num_heads * (qk_nope_head_dim + v_head_dim) = 128*256 = 32768), reshape, transpose, and split into K_nope and V tensors. Fuses normalization, projection, and memory layout transformations.",
+      "slug": "064_latent_kv_expansion_with_split",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "time"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused Conv1d projection to 2x channels followed by channel-wise split into mean and log-variance statistics. Performs a single Conv1d with output channels = 2*out_channels, then splits the result along the channel dimension into separate mean and logs tensors.",
+      "slug": "065_fused_statistics_projection_and_split",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "n_heads",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for masked softmax with attention dropout. Computes gradients through dropout -> softmax -> masked_fill in reverse order.",
+      "slug": "066_masked_softmax_with_attention_dropout_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Flash Attention for Grouped Query Attention with ultra-long context. Fuses QKV projection, RoPE application, GQA KV repetition, scaled dot-product attention with causal masking, and output projection.",
+      "slug": "067_flash_attention_gqa_ultralong",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 18
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_heads",
+        "num_kv_heads",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for fused rotary position embedding (RoPE) application. Computes gradients w.r.t. query, key, cosine, and sine tensors. The gradient computation mirrors the forward pass structure: grad_x = (grad_output * cos) + (rotate_half(grad_output) * sin).",
+      "slug": "068_fused_rope_application_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused residual addition followed by RMSNorm. Computes hidden_states = residual + hidden_states, then applies RMSNorm: output = weight * (x / sqrt(mean(x^2) + eps)). This pattern occurs twice per decoder layer in transformer models.",
+      "slug": "069_rms_norm",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_chunks"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused intra-chunk diagonal computation for Mamba2 SSD that combines segment_sum for causal masking, B/C matrix contraction to form attention-like weights G, and application of exponential decay mask L to compute Y_diag. This is the most memory-intensive part of the chunked parallel scan.",
+      "slug": "070_mamba2_fused_intra_chunk_diagonal_computation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "current_seq_len",
+        "new_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused KV cache update with RoPE application. Applies rotary position embeddings to incoming key states and updates both key and value caches in a single operation. Critical for autoregressive generation performance.",
+      "slug": "071_kv_cache_update_with_rope",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len_dec",
+        "seq_len_enc"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for cross-attention QKV projection with GQA repeat. Computes gradients for decoder_hidden_states, encoder_hidden_states, q_weight, k_weight, and v_weight given upstream gradients from query_states, key_states, and value_states.",
+      "slug": "072_cross_attention_qkv_projection_with_gqa_repeat_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "encoder_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused encoder final RMSNorm with cross-attention K/V projection. Applies RMSNorm to encoder hidden states then projects to cross-attention keys and values, avoiding intermediate materialization of normalized states.",
+      "slug": "073_fused_encoder_final_norm_to_decoder_cross_attention_kv_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Gated MLP with SiLU activation that fuses gate and up projections into a single linear layer, then splits and applies gated activation before down projection. The pattern is: gate_up_proj -> chunk -> SiLU(gate) * up -> down_proj.",
+      "slug": "074_fused_gated_mlp_silu",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Grouped Query Self-Attention with integrated RoPE position embeddings. Supports both encoder (non-causal, 16 heads, 4 KV heads) and decoder (causal, 24 heads, 8 KV heads) configurations. Fuses Q/K/V projections, RoPE application, GQA computation, and output projection.",
+      "slug": "075_grouped_query_self_attention_with_rope",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Batched MoE expert forward pass for inference that processes all experts in parallel. Includes gate_up projection, custom gated GLU activation with clamping, down projection, and routing weight application.",
+      "slug": "076_batched_expert_forward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Whisper decoder output projection layer that maps hidden states (d_model=1280) to vocabulary logits (vocab_size=51866). This is a critical bottleneck in autoregressive generation as it runs for every generated token. The operation is C = A @ B.T where A is hidden_states and B is the weight matrix.",
+      "slug": "077_whisper_decoder_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "num_channels",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "GroupNorm operation for Stable Diffusion UNet. Normalizes features across spatial dimensions within channel groups. Computes mean and variance per group, normalizes, and applies affine transform. With 32 groups and channels of 320/640/1280, this operation appears hundreds of times per forward pass.",
+      "slug": "078_group_norm_fusion",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for SSM output projection with gated multiplication. Computes gradients for: output = out_proj(ssm_output * gate_activated) where gate_activated = silu(gate) if use_silu_gate else gate. Returns gradients for ssm_output, gate, weight, and bias.",
+      "slug": "079_ImageNet_83.6_ssm_output_projection_gate_multiply_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "AdaLayerNormContinuous normalization with adaptive scale and shift modulation conditioned on timestep embeddings. Computes layer normalization, projects temb through a linear layer to get scale/shift, then modulates: normalized * (1 + scale) + shift.",
+      "slug": "080_adaptive_layernorm_continuous_with_modulation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "context_seq_len",
+        "image_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Joint attention context projection that concatenates image and context attention outputs along the feature dimension (duplicating the concatenated sequence) and projects through a linear layer, then splits back into image and context streams. This is a fused operation combining concatenation, linear projection, and sequence splitting.",
+      "slug": "081_joint_attention_context_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Scaled dot-product attention with QK LayerNorm normalization. Query and key tensors are normalized using LayerNorm before computing attention scores. This is used in SD3.5 transformer blocks with 24 heads and 64-dim per head.",
+      "slug": "082_qk_norm_scaled_dot_product_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len_kv",
+        "seq_len_q"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Fused attention score-value matrix multiplication that computes attention_weights @ V followed by transpose and reshape. This is the second major matmul in attention (after QK^T softmax) and appears in every self-attention and cross-attention layer throughout SDXL UNet.",
+      "slug": "083_attention_score_value_matmul",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_elements"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for SiLU (Swish) activation function. Computes gradient with respect to input: grad_input = grad_output * sigmoid(x) * [1 + x * (1 - sigmoid(x))]",
+      "slug": "084_silu_activation_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "GEGLU (Gated GLU with GELU) activation function. Splits input along last dimension into two halves, applies approximate GELU (tanh-based) to the first half, and multiplies element-wise with the second half. Used in transformer feed-forward networks.",
+      "slug": "085_geglu_activation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "point_batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "SAM-HQ's fused IoU prediction and hypernetwork weight generation from transformer output tokens. Processes transformer outputs to simultaneously generate IoU quality scores via a 3-layer MLP (256->1024->1024->4) and dynamic convolution weights for mask generation via 4 parallel 3-layer MLPs (256->256->256->32).",
+      "slug": "086_sam_hq_mask_decoder_iou_hypernetwork_fusion",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for fused embedding lookup and RMSNorm. Computes gradients for embedding table (scatter-add) and RMSNorm weight (reduction). The forward pass performs: embed_lookup -> RMSNorm(x * rsqrt(mean(x^2) + eps) * weight).",
+      "slug": "087_embedding_with_initial_layernorm_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_heads",
+        "num_kv_heads",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Rotary Position Embedding (RoPE) application that rotates query and key vectors in attention mechanisms based on their positions. Splits the feature dimension into pairs, applies rotation matrices derived from position indices and frequency bands. Critical for diffusion transformers as it provides position information without learned parameters.",
+      "slug": "088_rotary_position_embedding_application",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "VAE self-attention block with group normalization. Applies group norm, flattens spatial dimensions (B,C,H,W) to (B,H*W,C), computes single-head self-attention over spatial positions, reshapes back, and adds residual. Critical for capturing long-range spatial dependencies in VAE encoder/decoder.",
+      "slug": "089_vae_attention_block_with_groupnorm",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for batched 2D RoPE position encoding. Computes gradients through cos/sin operations for mixed text-image sequences. Since positions and theta are non-differentiable, no gradients propagate further.",
+      "slug": "090_batched_2d_rope_position_encoding_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for fused GQA QKV projection with RoPE and QK normalization. Computes gradients through RMS normalization, rotary position embedding, reshape/transpose operations, and linear projection.",
+      "slug": "091_fused_gqa_qkv_rope_qk_norm_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Grouped Query Attention with QK normalization for GLM-4. Includes Q/K/V projections, RMSNorm on Q/K, RoPE, GQA with 96 query heads and 8 KV heads (12x repetition), scaled dot-product attention with causal mask, and output projection.",
+      "slug": "092_gqa_attention_with_qk_norm",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "N"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "Backward pass for grouped top-k MoE routing with hierarchical expert selection. Computes gradients through scaling, normalization, gather (scatter), sigmoid, and linear projection.",
+      "slug": "093_grouped_topk_moe_routing_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L1",
+      "description": "RWKV's time decay exponential computation with numerical stabilization for the WKV attention mechanism. Computes -exp(time_decay) and manages exponential stability through max-state tracking for linear-time attention.",
+      "slug": "094_time_decay_exponential_stabilization",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for fused vision multi-head attention with pre-normalization and residual connection. Computes gradients through: residual connection, dropout, output projection, attention mechanism (softmax, matmul), head split/merge, QKV projection, and LayerNorm.",
+      "slug": "001_fused_vision_multihead_attention_with_norms_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete LLaMA decoder layer block fusing: input RMSNorm, multi-head GQA attention with RoPE, attention residual, post-attention RMSNorm, SwiGLU MLP, and MLP residual. This represents the atomic computational unit repeated across all layers.",
+      "slug": "002_decoder_layer_full_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 18
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for Grouped Query Attention with Rotary Position Embeddings. Computes gradients through output projection, attention computation, RoPE, and Q/K/V projections.",
+      "slug": "003_grouped_query_attention_with_rope_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Fused operation combining residual connection, RMSNorm, and complete SwiGLU MLP block. This pattern appears at every decoder layer after the attention block where the attention output residual is added, then immediately normalized, and fed into the MLP (gate_proj, up_proj, SiLU activation, element-wise multiply, down_proj).",
+      "slug": "004_fused_residual_rms_mlp",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for SwiGLU MLP: computes gradients for input, gate_weight, up_weight, and down_weight through the chain output = down_proj(silu(gate_proj(x)) * up_proj(x))",
+      "slug": "005_swiglu_mlp_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 18
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len",
+        "total_num_images",
+        "total_num_videos"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complex 3D position ID calculation for multi-modal inputs (text, images, videos) that computes temporal, height, and width position indices for rotary embeddings. Handles variable-length sequences with different grid sizes, performs spatial merging calculations, and creates position deltas for rope indexing.",
+      "slug": "006_multimodal_rope_position_calculation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Grouped Query Attention with Multi-modal 3D Rotary Position Embeddings. Supports 28 query heads and 4 KV heads (7:1 GQA ratio) with specialized 3D RoPE for temporal/height/width dimensions in vision tokens.",
+      "slug": "007_multimodal_rotary_embedding_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Mixture-of-Experts sparse routing and expert dispatch system. Routes each token to top-8 experts out of 128 total experts using gating network, performs expert computation with dynamic batching, and aggregates results weighted by routing probabilities.",
+      "slug": "008_moe_sparse_routing_and_dispatch",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete decoder layer with pre-normalization, self-attention (GQA with Q/K norm), MoE MLP, and residual connections. Includes RMSNorm before attention and MLP, rotary position embeddings, and sparse mixture of experts routing.",
+      "slug": "009_decoder_layer_with_residual_connections",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete MoE expert computation pipeline including expert selection, token routing to experts, parallel expert forward passes (SwiGLU MLPs), and weighted accumulation of expert outputs. This is the core computational bottleneck in MoE models.",
+      "slug": "010_moe_expert_computation_with_weighted_accumulation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for MoE sparse routing and dispatch. Computes gradients through softmax, top-k selection (straight-through estimator), normalization, and router linear projection.",
+      "slug": "011_moe_sparse_routing_and_dispatch_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Optimized batched MoE expert execution with capacity-based token batching. Groups tokens by assigned experts using capacity factors, executes all experts in parallel using batched matrix operations, and performs efficient scatter-gather for weighted aggregation. Uses SwiGLU activation (silu(gate) * up) for expert computation. Capacity factor is fixed at 1.25.",
+      "slug": "012_moe_expert_batched_execution_with_capacity_factor",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Expert computation and weighted aggregation in Sparse MoE with shared expert. Performs parallel expert forward passes (SwiGLU MLPs), applies routing weights, aggregates outputs, and adds gated shared expert contribution.",
+      "slug": "013_expert_weighted_aggregation_with_shared_expert",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_chunks",
+        "total_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for variable-length audio encoder attention with chunking. Computes gradients for hidden_states and all projection weights/biases through the attention mechanism, respecting chunk boundaries defined by cu_seqlens.",
+      "slug": "014_audio_encoder_varlen_attention_with_chunking_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "time_after_conv",
+        "time_dim"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Audio encoder's sinusoidal position embedding generation followed by 3-stage Conv2d downsampling (8x total reduction), GELU activations, and linear projection to model dimension. Processes mel-spectrogram through conv layers, adds cached sinusoidal position embeddings, and returns padded output.",
+      "slug": "015_audio_sinusoidal_position_embedding_with_conv_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete MoE expert computation including gate routing, top-k selection, expert MLPs with SwiGLU activation, and weighted aggregation. Processes tokens through 64 experts with top-8 selection. Each expert is a 3-layer MLP (gate_proj, up_proj, down_proj) with SwiGLU activation.",
+      "slug": "016_moe_expert_mlp_with_load_balancing",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_sequences",
+        "total_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for fused vision attention with cu_seqlens and 2D rotary position embeddings. Computes gradients for hidden_states, QKV projection weights/biases, and output projection weights/biases.",
+      "slug": "017_fused_vision_cu_seqlens_attention_with_2d_rope_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_sequences",
+        "total_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Variable-length vision attention using cumulative sequence lengths (cu_seqlens). Processes multiple images/videos in a single batch by splitting Q/K/V according to cu_seqlens boundaries, applying rotary position embeddings, performing separate attention computations for each sequence, then concatenating results. Used in vision transformer layers for efficient batched inference with mixed image/video inputs.",
+      "slug": "018_cu_seqlens_variable_length_vision_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "kv_seq_len",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Fused Qwen2VL decoder layer combining input RMSNorm, multimodal 3D RoPE attention with GQA (28 query heads, 4 KV heads), residual connection, post-attention RMSNorm, SwiGLU MLP, and final residual. This represents the complete decoder layer computation path.",
+      "slug": "019_decoder_layer_fused_attention_mlp",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete decoder layer with pre-normalization, attention, MLP, and residual connections. Pattern: x = x + attention(norm(x)), x = x + mlp(norm(x)). This is the fundamental building block executed N times per forward pass.",
+      "slug": "020_decoder_layer_pre_post_norm_residual",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_text_tokens",
+        "num_video_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for cross-attention text-video conditioning. Computes gradients through output projection, attention mechanism (softmax, Q@K^T), and Q/K/V linear projections. Queries from video latents, keys/values from text embeddings.",
+      "slug": "021_cross_attention_text_video_conditioning_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_frames",
+        "num_spatial_tokens",
+        "text_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete U-Net style denoising block for video latent diffusion combining temporal self-attention, spatial self-attention, cross-attention with text conditioning, and feedforward network. Processes video latents at each denoising timestep with different attention patterns across temporal and spatial dimensions.",
+      "slug": "022_video_latent_denoising_unet_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "frames",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "VAE encoder downsampling block for video-to-latent compression. Converts raw video frames to compressed latent representations through spatial and temporal downsampling with 3D convolutions, group normalization, SiLU activations, and residual connections.",
+      "slug": "023_video_latent_vae_encoder_downsampling",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Parallel execution of 256 routed MoE experts with token-to-expert dispatch and weighted aggregation. Each expert is a SwiGLU MLP (gate_proj, up_proj, down_proj). This operation performs expert masking, token gathering per expert, parallel expert computation, weight application, and scatter-add aggregation back to original token positions.",
+      "slug": "024_moe_expert_parallel_execution",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for MoE expert parallel execution. Computes gradients for hidden_states, topk_weights, gate_weights, up_weights, and down_weights through the SwiGLU MLP expert computation with token dispatch and weighted aggregation.",
+      "slug": "025_moe_expert_parallel_execution_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete MoE expert parallel execution with weighted aggregation. After routing determines expert assignments, this operation performs parallel expert computations across all 16 experts with dynamic token assignment. Each expert processes assigned tokens through a gated MLP (gate_proj, up_proj, SiLU, multiply, down_proj), then results are weighted by routing weights and aggregated back to original token positions via scattered writes.",
+      "slug": "026_moe_expert_parallel_execution_with_weighted_aggregation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Grouped Query Attention with YARN RoPE scaling and Q/K normalization. 40 query heads, 8 key-value heads (5:1 GQA ratio), head dimension 128, YARN RoPE with 8x scaling for 65536 max positions, sliding window attention 4096 tokens, RMS normalization on Q/K before attention.",
+      "slug": "027_grouped_query_attention_with_yarn_rope_and_qk_norm",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for Grouped Query Attention with GLM-style Rotary Position Embeddings. Computes gradients for hidden_states and all projection weights (Q, K, V, O) through the complete attention mechanism including RoPE, GQA head expansion, scaled dot-product attention, and output projection.",
+      "slug": "028_gqa_rotary_attention_core_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Mixture of Experts sparse routing with top-2 expert selection from 64 experts, correction bias, weight normalization, token dispatch to expert MLPs with SiLU activation, and result aggregation. Includes shared expert computation.",
+      "slug": "029_moe_sparse_routing_and_dispatch",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 9
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "img_seq_len",
+        "text_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Flux concatenated sequence processing pattern: concatenates text and image sequences, applies linear projection, then splits back. This pattern appears in dual-stream transformer blocks and represents a memory bandwidth bottleneck.",
+      "slug": "030_flux_concatenated_sequence_processing_with_split",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "FLUX's combined timestep and text projection embeddings that process timestep through sinusoidal embeddings, then concatenate with pooled text projections and project to inner dimension. This generates the conditioning signal (temb) that modulates all transformer blocks through adaptive layer normalization. The operation involves: (1) timestep scaling by 1000, (2) sinusoidal position embedding generation with frequencies, (3) MLP projection of timestep embeddings, (4) linear projection of pooled text embeddings, (5) addition to produce final conditioning vector.",
+      "slug": "031_flux_timestep_guidance_projection_embedding",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "is_joint_block",
+        "seq_len",
+        "text_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Dual-stream attention block with conditional cross-attention for FIBO model. Implements joint attention between image and text tokens (double layers) or self-attention only (single layers). Includes AdaLN modulation, QKV projection with 24 heads of dimension 128, 3D RoPE positional encoding, attention computation, output projection, and post-attention modulation with residual connection.",
+      "slug": "032_dual_stream_attention_with_conditional_cross_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Multi-scale feature pyramid processing for hierarchical image processing with encoder-decoder architecture and skip connections. Implements U-Net style progressive downsampling and upsampling with channel expansion/reduction at each scale level.",
+      "slug": "033_multi_scale_feature_pyramid",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "lang_seq_len",
+        "vision_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Cross-attention fusion layer for Qwen3-VL multimodal processing. Performs cross-attention between language queries (with 1D RoPE) and vision key-values (with 3D RoPE for temporal-height-width positions). Uses Grouped Query Attention (GQA) with 32 query heads and 8 key-value heads.",
+      "slug": "034_vision_language_cross_attention_fusion",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "dim",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "ConvNextV2 block with Global Response Normalization (GRN). Combines depthwise 7x7 convolution, LayerNorm, pointwise expansion, GELU activation, GRN layer, pointwise projection, and residual connection. GRN computes L2 norm across spatial dimensions and normalizes by channel-wise mean.",
+      "slug": "035_convnextv2_block_with_grn",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "B",
+        "H",
+        "W"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for ConvNextV2 layer with NHWC persistence. Computes gradients through: residual addition, drop path, permutations, linear projections, GRN (Global Response Normalization), GELU activation, LayerNorm, and depthwise 7x7 convolution.",
+      "slug": "036_convnextv2_layer_with_nhwc_persistence_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for Gemma3 attention with Q/K RMSNorm, RoPE, and soft-capping. Computes gradients for hidden_states, Q/K/V/O projection weights, and Q/K norm weights.",
+      "slug": "037_qk_norm_rope_attention_core_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Audio attention with relative position embeddings, local causal masking with configurable context windows, attention logit soft-capping, and block-based processing. Processes audio in chunks with overlapping context windows using sinusoidal position encoding.",
+      "slug": "038_audio_relative_position_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 14
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "KV-Sharing Attention with RoPE for Gemma3n. Implements novel KV-sharing mechanism where later layers reuse key-value states from earlier non-shared layers. Supports both global and sliding window attention patterns with RoPE embeddings, query/key/value normalization, and attention logit soft-capping.",
+      "slug": "039_kv_shared_attention_with_rope",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for AltUp predict-correct cycle. Computes gradients for prediction coefficients, correction coefficients, router weights, and norm weights through the combined predict and correct operations.",
+      "slug": "040_altup_predict_correction_cycle_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "KV-shared attention with dual RoPE (global and local), Q/K/V normalization, soft-capping, and grouped-query attention. Implements attention where later layers can reuse KV states from earlier layers, with dual rotary position embeddings.",
+      "slug": "041_kv_shared_attention_with_dual_rope",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for fused FFN block with GELU activation, residual connection, and layer normalization. Computes gradients for hidden_states, fc1_weight, fc1_bias, fc2_weight, fc2_bias, ln_weight, and ln_bias.",
+      "slug": "042_ffn_gelu_projection_fused_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Mamba-2 chunk-based parallel scan with segment sum computation for intra-chunk and inter-chunk state propagation. This is the core parallel scanning algorithm that enables efficient SSM computation by breaking sequences into chunks (chunk_size=256), computing intra-chunk attention-like patterns using segment sums, maintaining inter-chunk state recurrence with exponential decay, and combining diagonal (intra-chunk) and off-diagonal (inter-chunk) contributions.",
+      "slug": "043_mamba_chunk_scan_with_segsum",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_chunks"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Mamba SSM parameter discretization and segment sum computation for chunk-based parallel processing. Discretizes continuous-time SSM parameters using timestep dt, computes cumulative sums for decay factors, and performs segment sum operations for intra-chunk attention-like computations.",
+      "slug": "044_mamba_discretization_and_segsum",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "audio_seq_len",
+        "batch_size",
+        "num_audio_tokens",
+        "text_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete end-to-end multimodal fusion pipeline that processes raw audio features through a CTC encoder, applies windowed Q-Former downsampling with learnable queries, and scatters the resulting audio embeddings into language model token embeddings at audio token positions. This is the critical bottleneck that bridges audio and language modalities.",
+      "slug": "045_audio_encoder_to_language_model_multimodal_fusion",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Conformer attention with Shaw's relative positional embeddings. Processes sequences in fixed-size context blocks (512 tokens), computes scaled dot-product attention within each block, and adds relative positional bias via learned embeddings. Handles dynamic padding and masking for incomplete blocks.",
+      "slug": "046_conformer_relative_position_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "MoE training forward pass with token repetition and parallel expert computation. Each token is repeated num_experts_per_tok times, processed through experts using masked indexing with SwiGLU FFN, and routing weights are applied before summing across experts.",
+      "slug": "047_moe_training_token_repeat_and_expert_computation",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Optimized MoE expert inference dispatch that batches tokens by expert assignment, processes them through experts sequentially with SwiGLU activation, and reconstructs the output with weighted combinations. This is the critical inference path for a 256-expert MoE system that processes 8 experts per token.",
+      "slug": "048_moe_expert_inference_batched_dispatch",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Group-limited top-k expert routing for Mixture of Experts. Implements a two-stage selection: first organizes 256 experts into 8 groups, computes group scores by summing top-2 expert scores within each group, selects top-4 groups, then picks top-8 experts from selected groups. Returns selected expert indices and normalized routing weights scaled by routed_scaling_factor.",
+      "slug": "049_group_limited_topk_routing",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "VAE decoder mid-block combining ResNet blocks with self-attention at the bottleneck. Processes compressed latent representation through: ResNet -> Attention -> ResNet. The attention operates on spatial features with GroupNorm, QKV projections, multi-head self-attention, and residual connections. Uses 512 channels at the bottleneck with 4 groups for GroupNorm.",
+      "slug": "050_vae_decoder_mid_block_attention_resnet",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 11
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete end-to-end HyenaBlock forward pass that fuses all operations from input to output: residual management, layer normalizations with dtype conversions, the full Hyena operator (input projection, short conv, filter generation, FFT convolution, gating), MLP with GELU activation, and final residual addition.",
+      "slug": "051_seqlen-finetuned-reconstructed_hyena_complete_forward_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Hyena gating mechanism and output projection that combines multiple orders of filtered outputs through cascaded gating with FFT convolution, followed by transpose and linear projection. For order=2: v = dropout(v * x[1]), v = fftconv(v, k[0], bias[0]), y = v * x[0], y = transpose(y), y = out_proj(y).",
+      "slug": "052_seqlen-finetuned-reconstructed_hyena_gating_and_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete Mllama text decoder layer combining self-attention with RoPE, RMSNorm, gated MLP, and residual connections. This is the dominant computational pattern in the text model (32 out of 40 layers). Architecture: (1) RMSNorm + self-attention with RoPE and GQA (32 heads, 8 KV heads) + residual, (2) RMSNorm + gated MLP with SiLU + residual.",
+      "slug": "053_text_decoder_layer_with_self_attention_and_mlp",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete vision encoder layer with self-attention, MLP, layer norms, and tanh-gated residual connections. This is the dominant computational pattern in the vision encoder, appearing in 8 global vision layers with gating. The gated residuals use tanh activation on learnable gate parameters to modulate the contribution of attention and MLP outputs.",
+      "slug": "054_vision_encoder_layer_with_gated_residuals",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete fused audio preprocessing pipeline that performs two strided 1D convolutions with GELU activations on mel spectrogram input, adds learned positional embeddings, and processes through the first encoder layer's self-attention and FFN blocks. This represents the critical path from raw audio features to contextualized audio embeddings.",
+      "slug": "055_audio_encoder_conv_positional_layer_stack",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 15
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for complete decoder transformer layer with pre-norm attention and FFN with residual connections. Computes gradients for all weights and input through RMSNorm, GQA attention with RoPE, and SwiGLU FFN.",
+      "slug": "056_language_model_decoder_prenorm_attention_ffn_residual_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "time"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Residual coupling block for normalizing flow with affine coupling transformations. Splits channels in half, transforms one half conditioned on the other, and combines. Supports forward and reverse passes for flow-based generative modeling.",
+      "slug": "057_residual_coupling_flow_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Mamba2 selective state space model core computation including convolution, selective scan with chunking, state space discretization, and gated normalization. This is the dominant computation in the hybrid architecture.",
+      "slug": "058_mamba2_selective_scan",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete Qwen3 decoder layer block fusing: input RMSNorm -> QKV projection with QK norm -> RoPE -> GQA attention -> output projection -> residual -> post-attention RMSNorm -> SwiGLU MLP -> final residual. Hidden size 5120, 40 query heads, 8 KV heads, head dim 128, intermediate size 17408.",
+      "slug": "059_decoder_layer_full_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Chunk-based Gated Delta Rule linear attention computation that processes sequences in chunks of 64 tokens. Implements delta rule update with exponential decay gating, chunk-wise attention with intra-chunk causal masking, inter-chunk recurrent state propagation, and cumulative decay tracking.",
+      "slug": "060_chunk_gated_delta_rule_linear_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Sparse Mixture-of-Experts block with top-10 routing across 512 experts. Includes router network, top-k expert selection with normalized weights, parallel expert computation with weighted aggregation, and shared expert with learned gating. This is a complete MoE forward pass with dynamic token-to-expert routing.",
+      "slug": "061_sparse_moe_routing_and_experts",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "encoder_seq_len",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete decoder transformer layer combining pre-norm RMSNorm, GQA self-attention with RoPE (16 query heads, 4 KV heads), residual connection, pre-norm RMSNorm for cross-attention, GQA cross-attention (16 query heads, 16 KV heads), residual connection, pre-norm RMSNorm for MLP, SiLU-gated MLP (8192 intermediate), and final residual. This represents the full decoder layer that repeats 18 times.",
+      "slug": "062_decoder_complete_layer",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete encoder layer processing chain with two sequential residual-norm patterns: (1) self-attention with pre-norm and residual, (2) MLP with pre-norm and residual. This pattern appears in all 12 encoder layers and represents a critical memory bandwidth bottleneck due to repeated residual additions and RMSNorm operations.",
+      "slug": "063_encoder_layer_dual_residual_norm_chain",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for multi-head QKV projection with RoPE. Computes gradients for hidden_states, q_weight, k_weight, and v_weight given gradients of query, key, and value states.",
+      "slug": "064_multi_head_qkv_projection_with_rope_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Sparse expert dispatch and weighted combination for MoE training. Processes experts sequentially with sparse token extraction, expert computation (gate_up projection, gated GLU with clamping, down projection), and scattered accumulation using index_add_.",
+      "slug": "065_sparse_expert_dispatch_and_combine",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "ResNet block with time embedding injection for Stable Diffusion UNet. Performs: GroupNorm -> SiLU -> Conv2d -> time_emb projection -> addition -> GroupNorm -> SiLU -> Dropout -> Conv2d -> residual addition. This is a fundamental building block that appears in every down/up block of Stable Diffusion.",
+      "slug": "066_resnet_block_with_time_embedding",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len_context"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete input processing pipeline for SD3.5 that converts spatial image latents through patch embedding with positional encoding, processes timestep and pooled projections into temporal conditioning, and projects context embeddings. Combines three embedding pathways: image patches, temporal conditioning, and text context.",
+      "slug": "067_patch_embed_to_joint_attention_input",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for GELU approximate feedforward network. Computes gradients through Linear2 -> GELU_approx -> Linear1 chain. The forward pass is: hidden_states -> Linear1 (expansion to 4x) -> GELU_approx -> Linear2 (contraction) -> output.",
+      "slug": "068_gelu_approximate_feedforward_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "context_len",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete residual path through a JointTransformerBlock including dual-stream attention, adaptive normalization, and feedforward with residual connections for SD3.5.",
+      "slug": "069_joint_transformer_block_residual_path",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "encoder_seq_len",
+        "spatial_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete BasicTransformerBlock combining self-attention, cross-attention, and feed-forward network with GEGLU activation. This is the fundamental building block in SDXL Refiner's UNet architecture, processing spatial features through self-attention (spatial coherence), cross-attention (text/image conditioning), and MLP with residual connections.",
+      "slug": "070_basic_transformer_block",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Edit consistency loss combining pixel reconstruction, perceptual features, and edit-region-aware spatial weighting for image editing models. Computes multi-scale perceptual features, applies spatial weighting based on edit masks, and combines pixel loss, perceptual loss, and preservation loss.",
+      "slug": "071_edit_consistency_loss_with_perceptual_weighting",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for region-aware self-attention with edit bias. Computes gradients through QKV projection, scaled dot-product attention with position-based and edit-region biases, softmax, dropout, and output projection.",
+      "slug": "072_region_aware_self_attention_with_edit_bias_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for feedforward MLP: computes gradients w.r.t. input hidden states, weight1, bias1, weight2, bias2 given upstream gradient. Forward: hidden_states -> Linear1 -> GELU -> Linear2 -> output.",
+      "slug": "073_feedforward_mlp_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "point_batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for SAM-HQ mask decoder IoU prediction and hypernetwork weight generation. Computes gradients for 5 MLPs: 1 IoU prediction MLP (256->1024->1024->4) and 4 parallel hypernetwork MLPs (256->256->256->32).",
+      "slug": "074_sam_hq_mask_decoder_iou_hypernetwork_fusion_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "n_key_tokens",
+        "n_query_tokens",
+        "point_batch_size"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Two-way transformer block for SAM-HQ mask decoder performing bidirectional cross-attention between sparse prompt tokens and dense image embeddings. Includes: (1) self-attention on sparse tokens, (2) cross-attention from tokens to image, (3) MLP on tokens, (4) cross-attention from image to tokens. Uses downsampled internal dimensions (256->128) for cross-attention efficiency.",
+      "slug": "075_sam_hq_mask_decoder_two_way_transformer",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for SAM-HQ vision attention with 2D decomposed relative positional embeddings. Computes gradients through output projection, attention mechanism, softmax, relative position bias, and QKV projection.",
+      "slug": "076_sam_hq_vision_attention_with_relative_position_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "height",
+        "width"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "SAM-HQ's windowed attention mechanism that fuses window partitioning, multi-head attention with 2D relative position embeddings, window unpartitioning, residual connections, layer normalization, and MLP block. Processes image patches in 14x14 windows for efficient local attention computation.",
+      "slug": "077_sam_hq_vision_encoder_window_partition_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "token_h",
+        "token_w"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Fused UNet upsampling path that combines timestep-conditioned adaptive group normalization with ResBlock upsampling and final convolution to convert transformer hidden states back to VAE latent space. This critical operation runs at every diffusion step for image generation.",
+      "slug": "078_fused_final_layer_upsample_with_adaptive_norm",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete vision encoder layer combining multi-head self-attention with pre-LayerNorm, MLP with GELU activation, and residual connections. Performs: pre-norm -> attention -> residual -> pre-norm -> MLP -> residual.",
+      "slug": "079_git_vision_encoder_layer",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Backward pass for complete MoE layer with shared expert. Computes gradients through router (sigmoid + top-k selection), 128 routed experts with SwiGLU, and shared expert with SwiGLU. Gradients flow back through scatter-gather routing pattern.",
+      "slug": "080_moe_complete_layer_with_shared_expert_backward",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Sparse MoE expert computation with top-k routing across 128 routed experts. Each token is routed to 8 experts via sigmoid-based gating with group-wise selection. Includes SwiGLU activation (gate * up projection) and shared expert computation.",
+      "slug": "081_moe_sparse_expert_dispatch",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "L2",
+      "description": "Complete MoE layer forward pass that fuses routing, expert dispatch/computation, aggregation, shared expert computation. This represents the entire MoE layer computation from input hidden states through router sigmoid scoring, hierarchical group-based top-8 expert selection, parallel expert execution (160 routed experts with 1536 intermediate size), weighted aggregation, and shared expert computation (also 1536 intermediate size).",
+      "slug": "082_moe_layer_complete_forward_with_residual",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized attention output projection that combines multi-head attention outputs back to hidden dimension. Projects concatenated attention outputs from all heads (num_heads * head_dim = 7680) to hidden_size (7680) using blockwise FP8 quantization with BlockWise1x128 for activations and BlockWise128x128 for weights.",
+      "slug": "001_fp8_attention_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized QKV projection for multi-head attention with Q/K RMSNorm normalization. Projects hidden states to query, key, and value tensors with blockwise FP8 quantization (1x128 for activations, 128x128 for weights), followed by RMSNorm on Q and K heads. Uses GQA pattern with 60 query heads and 8 key/value heads.",
+      "slug": "002_fp8_attention_qkv_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized fused gate and up projection for standard MLP layers. Combines gate_proj and up_proj linear projections with SiLU activation: output = silu(gate_proj(x)) * up_proj(x). Uses BlockWise1x128 scaling for input activations and BlockWise128x128 scaling for weights.",
+      "slug": "003_fp8_mlp_gate_up_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized MoE expert computation with fused gate-up projection, SiLU activation, and down projection. Uses blockwise FP8 quantization with BlockWise1x128 for activations and BlockWise128x128 for weights.",
+      "slug": "004_fp8_moe_expert_linear",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized MoE router gate projection that computes expert routing logits. Projects hidden states to expert scores using blockwise FP8 quantization with BlockWise1x128 scaling for activations and BlockWise128x128 scaling for weights. The weight matrix is padded to 128 experts for BlockWise128x128 compatibility.",
+      "slug": "005_fp8_moe_router_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized vision attention output projection that combines multi-head attention outputs back to hidden dimension. Projects concatenated attention outputs from all heads through a linear layer with blockwise FP8 quantization (1x128 for activation, 128x128 for weight).",
+      "slug": "006_fp8_vision_attention_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized QKV projection for vision transformer attention. Projects vision hidden states to query, key, and value tensors using a single fused linear layer with blockwise FP8 quantization (BlockWise1x128 for activations, BlockWise128x128 for weights).",
+      "slug": "007_fp8_vision_attention_qkv_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "num_vision_tokens",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized multimodal embedding projection that merges text embeddings with vision features. Takes text token embeddings and vision token embeddings, applies FP4-quantized linear projections to align dimensions, and merges them based on vision token mask positions. Uses block-wise FP4 quantization (16 elements per block) for the projection weights.",
+      "slug": "008_nvfp4_multimodal_embedding_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "B",
+        "merged_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized temporal patch merging with linear projection for video processing in Qwen3-VL. Merges temporal patches from video frames by reshaping (B, seq_len, C) -> (B, seq_len//temporal_merge_size, C*temporal_merge_size) and applies FP4-quantized linear projection to hidden_size using block-wise scaling (16 elements per block). The merged_seq_len (M dimension) must be a multiple of 128 for FP4 GEMM compatibility.",
+      "slug": "009_nvfp4_vision_temporal_patch_merge_with_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized attention output projection (o_proj) that projects concatenated attention outputs from (num_heads * v_head_dim) = 16384 dimensions back to hidden_size = 7168. Uses BlockWise1x128 scaling for activations and BlockWise128x128 scaling for weights.",
+      "slug": "010_fp8_attention_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized MoE gating mechanism with top-k expert selection using noaux_tc method. Computes expert scores via FP8 linear projection, applies sigmoid activation, adds correction bias, performs group-based top-k selection across 256 experts with 8 groups and 4 top groups. Returns top-8 expert indices and normalized weights per token.",
+      "slug": "011_fp8_moe_gate_routing",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized shared expert MLP with SwiGLU activation. Processes ALL tokens in MoE layers with blockwise FP8 quantization (1x128 for activations, 128x128 for weights). Architecture: x -> [gate_proj, up_proj] -> silu(gate) * up -> down_proj -> output.",
+      "slug": "012_fp8_shared_expert_mlp",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized Multi-head Latent Attention (MLA) KV compression projection with low-rank bottleneck. Compresses hidden_size (7168) to kv_lora_rank + qk_rope_head_dim (576), applies RMSNorm on compressed representation, then expands to num_heads * (qk_nope_head_dim + v_head_dim) (24576). Uses BlockWise1x128 scaling for activations and BlockWise128x128 scaling for weights.",
+      "slug": "013_fp8_mla_kv_compression_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized YaRN (Yet another RoPE extensioN method) rotary position embedding computation with dynamic frequency adjustment for extended context (163840 tokens). Computes cos/sin embeddings for rotary position encoding with YaRN interpolation and mscale factors.",
+      "slug": "014_fp8_yarn_rope_embedding",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized Multi-Latent Attention (MLA) output projection. Projects concatenated attention outputs (num_heads * v_head_dim = 16384) back to hidden_size (7168). Uses BlockWise1x128 scaling for activations and BlockWise128x128 scaling for weights.",
+      "slug": "015_fp8_mla_attention_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized Multi-Latent Attention (MLA) QKV projection with low-rank compression. Implements DeepSeek-V3's novel MLA mechanism with Q path (q_a_proj -> RMSNorm -> q_b_proj) and KV path (kv_a_proj_with_mqa -> split -> RMSNorm -> kv_b_proj). All linear layers use FP8 quantization with blockwise scaling. The kv_a_proj output dimension is padded to 640 (multiple of 128) for FP8 compatibility.",
+      "slug": "016_fp8_multi_latent_attention_qkv_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized shared expert MLP for DeepSeek-V3 MoE. Processes ALL tokens unconditionally using SwiGLU activation: output = down_proj(silu(gate_proj(x)) * up_proj(x)). Uses blockwise FP8 quantization with 128x128 block scaling for weights and per-row scaling for activations.",
+      "slug": "017_fp8_shared_expert_mlp",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized attention output projection followed by residual addition. Takes attention output (batch, seq_len, num_heads * head_dim), projects through FP4-quantized linear layer (o_proj), and adds residual connection. Uses NVFP4 block-scaled GEMM with 1x16 block scaling.",
+      "slug": "018_nvfp4_attention_output_projection_with_residual",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized Grouped Query Attention (GQA) with 64 query heads and 8 key-value heads (8:1 ratio). Performs Q/K/V projections with FP4 weights, applies RoPE embeddings, computes attention with repeat_kv for GQA, and produces output via FP4 output projection.",
+      "slug": "019_nvfp4_grouped_query_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized linear layer with block-wise scaling (16 elements per block). Computes y = x @ W^T where both x and W are quantized to FP4 with FP8 E4M3FN block-wise scale factors. Uses torch._scaled_mm for efficient FP4 matrix multiplication.",
+      "slug": "020_nvfp4_linear_layer",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized input projection for Mamba2 mixer. Projects hidden states from hidden_size (2688) to a large combined dimension (13952, padded from 13856 to be multiple of 128) for gated MLP branches, gate, convolution input, and delta/dt. Uses BlockWise1x128 scaling for activations and BlockWise128x128 scaling for weights.",
+      "slug": "021_fp8_mamba2_in_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized output projection in Mamba2 mixer that projects from intermediate size (2688) back to hidden dimension (2688). Uses BlockWise1x128 scaling for activations and BlockWise128x128 scaling for weights.",
+      "slug": "022_fp8_mamba2_out_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP8-quantized SSM parameter discretization in Mamba2 that computes dt (time step), dA (discretized A matrix), and dB (discretized B matrix) using FP8 linear projections with blockwise scaling.",
+      "slug": "023_fp8_mamba2_ssm_discretization",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 6
+    },
+    {
+      "axis_keys": [
+        "B",
+        "L"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized attention output projection (o_proj) that transforms concatenated multi-head attention outputs back to hidden dimension. Uses FP4 block-scaled GEMM with 16 elements per FP8 scale factor. Computes C = (A * scale_a * global_a) @ (B^T * scale_b * global_b) where A is the input activation and B is the weight matrix.",
+      "slug": "024_nvfp4_attention_output_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized Q, K, V projections for multi-head attention with GQA (32 query heads, 2 key-value heads). Performs three large matrix multiplications with FP4 weights and block-scaled quantization. Transforms hidden_size (2688) to num_heads * head_dim (4096) for queries and num_key_value_heads * head_dim (256) for keys and values.",
+      "slug": "025_nvfp4_attention_qkv_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "M"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized Mamba2 output projection that transforms the normalized SSM output back to hidden dimension. Uses FP4 weights with block-scaled quantization (16 elements per block). Performs matrix multiplication from intermediate_size (2688) to hidden_size (2688). Note: dimensions are padded to 2816 to satisfy 128-multiple constraint for FP4 quantization.",
+      "slug": "026_nvfp4_mamba2_out_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized MoE router projection that computes expert selection scores. Projects hidden states from hidden_size (2688) to n_routed_experts (128) using FP4 weights with block-scaled quantization, followed by sigmoid activation, bias correction, and top-k selection with normalized routing weights.",
+      "slug": "027_nvfp4_moe_router_projection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized attention QKV projection with RMSNorm, RoPE application, and KV cache update. Fuses Q/K/V projections (FP4 block-scaled), per-head RMSNorm on Q and K, rotary position embeddings, for GQA attention with 32 query heads and 8 KV heads.",
+      "slug": "028_nvfp4_attention_qkv_projection_with_rope",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized fused MLP with SiLU activation and gating mechanism. Implements down_proj(SiLU(gate_proj(x)) * up_proj(x)) with FP4 quantization and block-wise scaling (16 elements per block). Gate and up projections share input quantization, followed by fused SiLU gating, then down projection.",
+      "slug": "029_nvfp4_fused_mlp_silu_gating",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized fused decoder layer pre-normalization and complete attention computation. Combines RMSNorm on input hidden states, Q/K/V projections with FP4 quantization, per-head RMSNorm on Q and K, RoPE positional embeddings, Grouped Query Attention with KV repeat, and output projection with FP4 quantization.",
+      "slug": "030_nvfp4_fused_decoder_layer_pre_norm_attention",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "batch_size",
+        "seq_len"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized Grouped Query Attention (GQA) with KV cache repeat operation. Implements attention with 40 query heads and 8 key-value heads (5x repeat factor). Uses FP4 block-scaled quantization for Q@K^T and Attn@V matrix multiplications with softmax in between. Note: seq_len must be a multiple of 128 for FP4 quantization compatibility.",
+      "slug": "031_nvfp4_grouped_query_attention_with_kv_repeat",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized MoE expert computation with SwiGLU gating. Performs output = down_proj(silu(gate_proj(x)) * up_proj(x)) where all projections use FP4 quantization with 16-element block-wise scaling.",
+      "slug": "032_nvfp4_moe_expert_linear_with_gating",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    },
+    {
+      "axis_keys": [
+        "num_tokens"
+      ],
+      "baseline_present": false,
+      "baseline_variants": [],
+      "category": "Quant",
+      "description": "FP4-quantized MoE routing gate that computes router logits via FP4 scaled GEMM and performs top-k expert selection with softmax normalization. Input activations are quantized to FP4 on-the-fly, multiplied with pre-quantized gate weights, then softmax and top-k selection are applied.",
+      "slug": "033_nvfp4_moe_routing_with_topk_selection",
+      "sm120_action": "source_review_then_build_correctness_trace_ncu",
+      "workload_count": 16
+    }
+  ],
+  "pro6000_specialized_counterparts": [
+    {
+      "slug": "fp8_e4m3_qmma_dep_chain",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "fp8_e5m2_saturation",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "fp6_e3m2_mma_dep_chain",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "fp6_e2m3_saturation",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "fp4_e2m1_mma_dep_chain",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "nvfp4_blockscale_gemm",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "sparse_2to4_fp8_gemm",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "tma_tensor_copy_2d",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "dsmem_pairwise_latency",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "dsmem_ring_bandwidth",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "cluster_remote_reduction",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "cluster_rmsnorm_dsmem_bf16",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "l2_persisting_window_sweep",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "l2_prefetch_hint_sweep",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "carveout_sensitivity_probe",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    },
+    {
+      "slug": "vendor_fp8_matmul_cublaslt",
+      "status": "source_and_live_probe_required",
+      "why": "SM120 feature/control counterpart not represented by a single official SOLBench row."
+    }
+  ],
+  "schema_version": 1,
+  "simbench_rows": [
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "fma_dep_chain",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "fp32_fma_dep_chain"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "hmma_gemm",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "bf16_hmma_gemm_traceable"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "hmma_gemm",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "TF32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "tf32_hmma_gemm_traceable"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "hmma_gemm",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "fp16_hmma_gemm_traceable"
+    },
+    {
+      "arch_gate": [
+        "sm_90a"
+      ],
+      "domain": "micro",
+      "family": "wgmma",
+      "level": "L1",
+      "platforms": "h100",
+      "precision": "BF16",
+      "pro6000_role": "not_targeted",
+      "reason": "Hopper-only: uses wgmma + setmaxnreg, not available on sm_120",
+      "slug": "wgmma_bf16_saturation"
+    },
+    {
+      "arch_gate": [
+        "sm_90a"
+      ],
+      "domain": "micro",
+      "family": "wgmma",
+      "level": "L1",
+      "platforms": "h100",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "not_targeted",
+      "reason": "Hopper-only: uses wgmma + setmaxnreg, not available on sm_120",
+      "slug": "wgmma_fp8_saturation"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "qmma_dep_chain",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "fp8_e4m3_qmma_dep_chain"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "qmma_saturation",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP8_E5M2",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "fp8_e5m2_saturation"
+    },
+    {
+      "arch_gate": [
+        "sm_120a"
+      ],
+      "domain": "micro",
+      "family": "qmma_dep_chain",
+      "level": "L1",
+      "platforms": "rtx_pro_6000_blackwell",
+      "precision": "FP6_E3M2",
+      "pro6000_role": "pro6000_specialized",
+      "reason": "Blackwell-only: requires FP6 mma on sm_120a",
+      "slug": "fp6_e3m2_mma_dep_chain"
+    },
+    {
+      "arch_gate": [
+        "sm_120a"
+      ],
+      "domain": "micro",
+      "family": "qmma_saturation",
+      "level": "L1",
+      "platforms": "rtx_pro_6000_blackwell",
+      "precision": "FP6_E2M3",
+      "pro6000_role": "pro6000_specialized",
+      "reason": "Blackwell-only: requires FP6 mma on sm_120a",
+      "slug": "fp6_e2m3_saturation"
+    },
+    {
+      "arch_gate": [
+        "sm_120a"
+      ],
+      "domain": "micro",
+      "family": "qmma_dep_chain",
+      "level": "L1",
+      "platforms": "rtx_pro_6000_blackwell",
+      "precision": "FP4_E2M1",
+      "pro6000_role": "pro6000_specialized",
+      "reason": "Blackwell-only: requires FP4 dense mma on sm_120a",
+      "slug": "fp4_e2m1_mma_dep_chain"
+    },
+    {
+      "arch_gate": [
+        "sm_120f"
+      ],
+      "domain": "micro",
+      "family": "blockscale_gemm",
+      "level": "L1",
+      "platforms": "rtx_pro_6000_blackwell",
+      "precision": "NVFP4",
+      "pro6000_role": "pro6000_specialized",
+      "reason": "Blackwell-only: requires NVFP4 block-scaled mma on sm_120a / sm_120f",
+      "slug": "nvfp4_blockscale_gemm"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "imma_gemm",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "int8_imma_gemm_traceable"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "sparse_gemm",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "sparse_2to4_bf16_gemm"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "sparse_gemm",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "sparse_2to4_int8_gemm"
+    },
+    {
+      "arch_gate": [
+        "sm_120a"
+      ],
+      "domain": "micro",
+      "family": "sparse_gemm",
+      "level": "L1",
+      "platforms": "rtx_pro_6000_blackwell",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "pro6000_specialized",
+      "reason": "Blackwell-only: requires sparse FP8 / mxf4 block_scale on sm_120a",
+      "slug": "sparse_2to4_fp8_gemm"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cp_async",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "cp_async_shared_tile_copy"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "tma",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "tma_tensor_copy_2d"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "shared_mem",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "shared_bank_conflict_stride"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cache",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "l2_thrash_pointer_chase"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "memory",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "dram_streaming_dot_product"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "memory",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "dram_stream_stride_mix"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "atomics",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_atomic_histogram"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "atomics",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_atomic_return_used"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "atomics",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_atomic_max_histogram"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "atomics",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_atomic_max_return_used"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "atomics",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_atomic_and_histogram"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "atomics",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_atomic_and_return_used"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "memory",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_vectorized_128b_copy"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "memory",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_scalar_32b_copy"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "memory",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "global_vectorized_64b_copy"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "control_flow",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "warp_divergence_reconvergence"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "register",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "register_spill_local_mem"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "local_mem",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "local_dynamic_index_array"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "local_mem",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "local_volatile_array"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "cluster",
+      "family": "cluster_latency",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "dsmem_pairwise_latency"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "cluster",
+      "family": "cluster_bandwidth",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "INT8",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "dsmem_ring_bandwidth"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "cluster",
+      "family": "cluster_reduction",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "cluster_remote_reduction"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_sampling",
+      "family": "topk_sampling",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "sampling_topk_temperature_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "embedding",
+      "family": "embedding_gather",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "embedding_gather_vocab128k"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "embedding",
+      "family": "embedding_scatter",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "embedding_bag_scatter_atomic"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "flash_attn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "flash_attn_fwd_bf16_causal"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "flash_attn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "flash_attn_fwd_bf16_noncausal"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "flash_attn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "flash_attn_fwd_fp8_causal"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "flash_attn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "flash_attn_bwd_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "flash_attn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "flash_attn_bwd_fp8"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_rope_kv",
+      "family": "paged_decode",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "pagedkv_decode_gqa_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_rope_kv",
+      "family": "paged_decode",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "pagedkv_decode_mqa_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_rope_kv",
+      "family": "paged_mla",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "paged_mla_decode_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "ragged_attn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "ragged_attention_prefill_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_rope_kv",
+      "family": "kv_update",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "kv_cache_update_rope_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_rope_kv",
+      "family": "rope",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "qkv_rope_standard_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_rope_kv",
+      "family": "rope",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "qkv_rope_yarn_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "multimodal",
+      "family": "rope",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "rope2d_mm_qkv_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_norm_ffn",
+      "family": "rmsnorm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "rmsnorm_fwd_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_norm_ffn",
+      "family": "rmsnorm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "rmsnorm_bwd_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_norm_ffn",
+      "family": "layernorm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "layernorm_fwd_bwd_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "diffusion",
+      "family": "groupnorm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "groupnorm_fwd_bwd_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_norm_ffn",
+      "family": "swiglu_ffn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "swiglu_ffn_fused_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_norm_ffn",
+      "family": "geglu_ffn",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "geglu_ffn_fused_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_moe",
+      "family": "moe_router",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "moe_router_topk_softmax"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_moe",
+      "family": "moe_grouped_gemm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "moe_grouped_gemm_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_moe",
+      "family": "moe_grouped_gemm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "moe_grouped_gemm_fp8"
+    },
+    {
+      "arch_gate": [
+        "sm_120a"
+      ],
+      "domain": "llm_moe",
+      "family": "moe_grouped_gemm",
+      "level": "L2",
+      "platforms": "rtx_pro_6000_blackwell",
+      "precision": "NVFP4",
+      "pro6000_role": "pro6000_specialized",
+      "reason": "Blackwell-only: requires NVFP4 block-scaled mma on sm_120a / sm_120f",
+      "slug": "nvfp4_grouped_gemm_moe"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "audio",
+      "family": "conformer",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "conformer_depthwise_glu_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "cluster",
+      "family": "cluster_norm",
+      "level": "L2",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "cluster_rmsnorm_dsmem_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "ssm",
+      "family": "mamba_scan",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "mamba_selective_scan_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "ssm",
+      "family": "mamba2",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "mamba2_discretize_chunk_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "ssm",
+      "family": "gated_delta",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "chunk_gated_delta_rule_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "ssm",
+      "family": "hyena",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "hyena_fft_conv_block_fp32"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "diffusion",
+      "family": "diffusion_resnet",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "diffusion_resnet_time_block_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "multimodal",
+      "family": "diffusion_cross_attn",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "diffusion_cross_attn_video_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "diffusion",
+      "family": "flux_adaln",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "flux_adaln_zero_mod_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "diffusion",
+      "family": "vae_conv",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "vae_conv_gn_silu_residual_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "vision",
+      "family": "vit_encoder",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "vit_encoder_block_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "vision",
+      "family": "sam_decoder",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "sam_mask_decoder_cross_attn_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "audio",
+      "family": "whisper",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "whisper_encoder_block_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "tts",
+      "family": "tts_duration",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "tts_duration_predictor_ln_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "tts",
+      "family": "tts_vocoder",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "tts_vocoder_upsample_silu_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "multimodal",
+      "family": "clip",
+      "level": "L3",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "clip_text_image_cross_attn_bf16"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "prefill_decode_pipeline",
+      "level": "L4",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "prefill_then_decode_pagedkv_pipeline"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_moe",
+      "family": "moe_layer_pipeline",
+      "level": "L4",
+      "platforms": "both",
+      "precision": "MIXED",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "moe_layer_residual_norm_pipeline"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "llm_attention",
+      "family": "speculative_decode_pipeline",
+      "level": "L4",
+      "platforms": "both",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "speculative_decode_draft_verify_pipeline"
+    },
+    {
+      "arch_gate": [
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "control",
+      "family": "vendor_cublaslt",
+      "level": "L1",
+      "platforms": "either",
+      "precision": "FP8_E4M3",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "Vendor-library control: cuBLASLt runs on both targets, excluded from headline scoring.",
+      "slug": "vendor_fp8_matmul_cublaslt"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "control",
+      "family": "vendor_cublas",
+      "level": "L1",
+      "platforms": "either",
+      "precision": "BF16",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "Vendor-library control: cuBLAS runs on both targets, excluded from headline scoring.",
+      "slug": "vendor_gemm_cublas"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "control",
+      "family": "vendor_cublas",
+      "level": "L1",
+      "platforms": "either",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "Vendor-library control: cuBLAS sgemm runs on both targets, excluded from headline scoring.",
+      "slug": "vendor_sgemm_cublas"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "control",
+      "family": "vendor_cublas",
+      "level": "L1",
+      "platforms": "either",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "Vendor-library control: cuBLAS sgemmStridedBatched runs on both targets, excluded from headline scoring.",
+      "slug": "vendor_sgemm_strided_batched_cublas"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cache",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "working_set_capacity_sweep"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cache",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "warm_cold_pair_relaunch"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cache",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "l2_prefetch_hint_sweep"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cache",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "l2_persisting_window_sweep"
+    },
+    {
+      "arch_gate": [
+        "sm_86",
+        "sm_90a",
+        "sm_120"
+      ],
+      "domain": "micro",
+      "family": "cache",
+      "level": "L1",
+      "platforms": "both",
+      "precision": "FP32",
+      "pro6000_role": "control_or_cross_arch",
+      "reason": "",
+      "slug": "carveout_sensitivity_probe"
+    }
+  ],
+  "source_census": {
+    "note": "Inventory only; source presence is not execution evidence.",
+    "official_solbench_by_category": {
+      "FlashInfer-Bench": 26,
+      "L1": 94,
+      "L2": 82,
+      "Quant": 33
+    },
+    "official_solbench_total": 235,
+    "simbench_mechanism_rows": 92
+  },
+  "target": {
+    "arch_id": "sm_120",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "sku": "rtx_pro_6000_ws"
+  }
+}

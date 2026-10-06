@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "meaning": "Requested collection surfaces; unavailable metrics remain visible in NCU logs.",
+  "full": {
+    "ncu_args": ["--set", "full", "--target-processes", "all", "--profile-from-start", "on", "--launch-skip", "0", "--launch-count", "1"],
+    "outputs": ["ncu-report.ncu-rep", "raw.csv", "stdout.txt", "stderr.txt"]
+  },
+  "identity_query": {
+    "commands": ["ncu --version", "ncu --list-chips", "ncu --query-metrics --query-metrics-mode suffix"],
+    "outputs": ["ncu-version.txt", "ncu-chips.txt", "ncu-metrics.txt"]
+  },
+  "optional_focus_sets": [
+    {"name": "launch_and_occupancy", "sections": ["LaunchStats", "Occupancy"]},
+    {"name": "compute", "sections": ["ComputeWorkloadAnalysis", "SchedulerStats"]},
+    {"name": "memory", "sections": ["MemoryWorkloadAnalysis", "MemoryWorkloadAnalysis_Tables"]},
+    {"name": "source", "sections": ["SourceCounters", "SpeedOfLight_RooflineChart"]}
+  ],
+  "notes": [
+    "The full section set can require multiple replay passes.",
+    "Section names and metric availability are chip/tool-version dependent; the identity query is collected first.",
+    "A raw CSV is an observation export, not a simulator parameter file."
+  ]
+}

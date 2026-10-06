@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "arch_id": "sm_120",
+  "sku": "rtx_pro_6000_ws",
+  "device_name_expected": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+  "compute_capability": [12, 0],
+  "vendor_facts": {
+    "die": "GB202",
+    "microarchitecture": "Blackwell",
+    "gpc_count": 12,
+    "tpc_count": 94,
+    "sm_count": 188,
+    "cuda_cores_per_sm": 128,
+    "cuda_cores": 24064,
+    "tensor_cores_per_sm": 4,
+    "tensor_cores": 752,
+    "memory_bytes": 103079215104,
+    "memory_type": "GDDR7_ECC",
+    "memory_interface_bits": 512,
+    "memory_bandwidth_bytes_per_second": 1792000000000,
+    "boost_clock_mhz": 2617,
+    "shared_memory_per_sm_bytes": 131072,
+    "max_resident_warps_per_sm": 48,
+    "max_blocks_per_sm": 32,
+    "tgp_watts": 600
+  },
+  "compile_targets": {
+    "baseline": "sm_120",
+    "family_forward_compatible": "sm_120f",
+    "architecture_specific_opt_in": "sm_120a",
+    "note": "Compile 120f/120a only for an explicitly selected feature probe; do not infer support from the target token alone."
+  },
+  "runtime_fields_to_collect": [
+    "gpu_name", "gpu_uuid", "compute_capability", "driver_version",
+    "cuda_runtime_version", "nvcc_version", "ncu_version", "nvbit_release",
+    "device_index", "clock_sm_mhz", "clock_memory_mhz", "power_state",
+    "mig_mode", "temperature_c", "persistence_mode"
+  ],
+  "typed_gaps_until_live_capture": [
+    "l1_geometry", "l2_slice_and_replacement_geometry", "bare_ldg_e_policy",
+    "load_store_latencies", "issue_ports_and_smsps", "tensor_shape_initiation_intervals",
+    "async_tma_completion_semantics", "clock_crosswalk"
+  ],
+  "forbidden_mutations": [
+    "gpu_clock_lock", "memory_clock_lock", "power_limit_change",
+    "persistence_mode_change", "compute_mode_change", "mig_reconfiguration"
+  ]
+}

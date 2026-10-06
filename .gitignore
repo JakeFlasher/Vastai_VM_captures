@@ -1,0 +1,13 @@
+# Cloud outputs are large and are transferred out-of-band.
+captures/**
+profiles/**
+metadata/**
+logs/**
+*.ncu-rep
+*.pb
+*.csv
+*.stdout
+*.stderr
+*.cubin
+*.sass
+*.so
